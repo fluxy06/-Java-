@@ -11,18 +11,14 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert.AlertType;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+
+import java.sql.*;
 
 public class Main extends Application {
 
-    String url = "jdbc:postgresql://172.17.2.175:5432/AuntificationFormDataBase";
-    String user = "Nikita";
-    String password = "123";
-
+    String url = "jdbc:postgresql://Nikita-MSI:5432/AuntificationFormDataBase";
+    String user = "postgres";
+    String pass = "123";
     @FXML
     private TextField nameUser; // Поле для ввода логина
 
@@ -54,6 +50,7 @@ public class Main extends Application {
     private void ChekInfo() {
         // Получаем данные из текстовых полей
         Alert alert = new Alert(AlertType.ERROR);
+        Alert alert2 = new Alert(AlertType.CONFIRMATION);
         String login = nameUser.getText();
         String password = passUser.getText();
 
@@ -77,24 +74,30 @@ public class Main extends Application {
         System.out.println("Пароль: " + password);
 
         // Проверка логина и пароля в базе данных
-        try (Connection connection = DriverManager.getConnection(url, user, password)) {
-            String query = "SELECT * FROM your_table WHERE login = '" + login + "' AND password = '" + password + "'";
-            try (Statement stmt = connection.createStatement();
-                 ResultSet rs = stmt.executeQuery(query)) {
-                if (rs.next()) {
-                    System.out.println("Успешный вход!");
-                    // Дальнейшая логика при успешном входе
-                } else {
-                    alert.setTitle("Ошибка");
-                    alert.setContentText("Неверный логин или пароль!");
-                    alert.showAndWait();
+        try (Connection connection = DriverManager.getConnection(url, user, pass)) {
+            String query = "SELECT * FROM public.\"InfoUsers\" WHERE \"Login\" = ? AND \"Password\" = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(query)) {
+                pstmt.setString(1, login);
+                pstmt.setString(2, password);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    if (rs.next()) {
+                        System.out.println("Успешный вход!");
+                        alert2.setTitle("Уведомление");
+                        alert2.setContentText("Данные корректны, успешный вход)");
+                        alert2.showAndWait();
+                        // Дальнейшая логика при успешном входе
+                    } else {
+                        alert.setTitle("Ошибка");
+                        alert.setContentText("Неверный логин или пароль!");
+                        alert.showAndWait();
+                    }
                 }
             }
-
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            alert.setTitle("Ошибка подключения");
-            alert.setContentText("Не удалось подключиться к базе данных: " + e.getMessage());
+            e.printStackTrace();
+            alert.setTitle("Ошибка");
+            alert.setContentText("Ошибка подключения к базе данных: " + e.getMessage());
             alert.showAndWait();
         }
     }

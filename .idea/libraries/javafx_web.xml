@@ -2,6 +2,7 @@
   <library name="javafx.web">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/../../../../Program Files (x86)/javafx-sdk-23/lib/javafx.web.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../../../../Program Files (x86)/postgresql-42.7.4.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
